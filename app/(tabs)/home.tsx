@@ -10,8 +10,9 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   homeWrapper: {
-    height: 300,
-    width: 300,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "green",
   },
 });

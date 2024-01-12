@@ -41,7 +41,7 @@ export default function Todos() {
   };
 
   return (
-    <View>
+    <View style={styles.pageWrapper}>
       <Text>Todos Page</Text>
       <FlatList
         data={todos}
@@ -61,6 +61,9 @@ export default function Todos() {
 }
 
 const styles = StyleSheet.create({
+  pageWrapper: {
+    flex: 1,
+  },
   itemWrapper: {
     flexDirection: "row",
     alignItems: "center",
