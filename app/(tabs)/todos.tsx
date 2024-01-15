@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import DraggableFlatList, {
+  ScaleDecorator,
+  RenderItemParams,
+} from "react-native-draggable-flatlist";
 import { getData, storeData } from "../../lib/getData";
-import { FlatList } from "react-native-gesture-handler";
 import Button from "../../components/Button";
 
 export interface TodoItem {
@@ -40,19 +43,33 @@ export default function Todos() {
     setTodos((todos) => [...todos, todo]);
   };
 
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<TodoItem>) => {
+    return (
+      <ScaleDecorator>
+        <TouchableOpacity
+          activeOpacity={1}
+          onLongPress={drag}
+          disabled={isActive}
+          style={[
+            styles.itemWrapper,
+            { backgroundColor: isActive ? "red" : "coral" },
+          ]}
+        >
+          <Text>{item.label}</Text>
+          <Text>{`${item.isComplete}`}</Text>
+        </TouchableOpacity>
+      </ScaleDecorator>
+    );
+  };
+
   return (
     <View style={styles.pageWrapper}>
       <Text>Todos Page</Text>
-      <FlatList
+      <DraggableFlatList
         data={todos}
-        renderItem={({ item }) => {
-          return (
-            <View key={item.id} style={styles.itemWrapper}>
-              <Text>{item.label}</Text>
-              <Text>{`${item.isComplete}`}</Text>
-            </View>
-          );
-        }}
+        onDragEnd={({ data }) => setTodos(data)}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
       />
 
       <Button label="Save Todos" onPress={() => storeData(todos)} />
@@ -67,5 +84,6 @@ const styles = StyleSheet.create({
   itemWrapper: {
     flexDirection: "row",
     alignItems: "center",
+    padding: 20,
   },
 });
