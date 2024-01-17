@@ -1,9 +1,11 @@
 import { Text, View, StyleSheet } from "react-native";
+import { Octicons } from "@expo/vector-icons";
 
 export default function Home() {
   return (
     <View style={styles.homeWrapper}>
-      <Text>Home Page</Text>
+      <Text style={styles.title}>Todo List</Text>
+      <Octicons name="checklist" size={80} color="black" />
     </View>
   );
 }
@@ -13,6 +15,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "green",
+    backgroundColor: "#a3c4bc",
+  },
+  title: {
+    fontSize: 38,
+    marginBottom: 20,
   },
 });

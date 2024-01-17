@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
+import { v4 as uuidv4 } from "uuid";
+import { MaterialIcons } from "@expo/vector-icons";
 import DraggableFlatList, {
   ScaleDecorator,
   RenderItemParams,
 } from "react-native-draggable-flatlist";
 import { getData, storeData } from "../../lib/getData";
 import Button from "../../components/Button";
+import AddTodoModal from "../../components/AddTodoModal";
 
 export interface TodoItem {
   id: string;
@@ -22,6 +31,8 @@ const dummyTodos: Array<TodoItem> = [
 
 export default function Todos() {
   const [todos, setTodos] = useState<Array<TodoItem>>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [inputText, setInputText] = useState("");
 
   useEffect(() => {
     getData()
@@ -43,20 +54,37 @@ export default function Todos() {
     setTodos((todos) => [...todos, todo]);
   };
 
+  const toggleItemDone = (id: string) => {
+    setTodos((todos) =>
+      todos.map((item) =>
+        item.id === id ? { ...item, isComplete: !item.isComplete } : item
+      )
+    );
+  };
+
   const renderItem = ({ item, drag, isActive }: RenderItemParams<TodoItem>) => {
     return (
       <ScaleDecorator>
         <TouchableOpacity
           activeOpacity={1}
           onLongPress={drag}
+          onPress={() => toggleItemDone(item.id)}
           disabled={isActive}
           style={[
             styles.itemWrapper,
-            { backgroundColor: isActive ? "red" : "coral" },
+            { backgroundColor: isActive ? "#004d83" : "#003459" },
           ]}
         >
-          <Text>{item.label}</Text>
-          <Text>{`${item.isComplete}`}</Text>
+          <Text style={styles.itemText}>{item.label}</Text>
+          {item.isComplete ? (
+            <MaterialIcons name="check-box" size={24} color="white" />
+          ) : (
+            <MaterialIcons
+              name="check-box-outline-blank"
+              size={24}
+              color="white"
+            />
+          )}
         </TouchableOpacity>
       </ScaleDecorator>
     );
@@ -64,7 +92,6 @@ export default function Todos() {
 
   return (
     <View style={styles.pageWrapper}>
-      <Text>Todos Page</Text>
       <DraggableFlatList
         data={todos}
         onDragEnd={({ data }) => setTodos(data)}
@@ -72,7 +99,34 @@ export default function Todos() {
         renderItem={renderItem}
       />
 
-      <Button label="Save Todos" onPress={() => storeData(todos)} />
+      <View>
+        <View style={{ marginBottom: 10 }}>
+          <Button label="Add Todo" onPress={() => setIsModalVisible(true)} />
+        </View>
+        <Button label="Save Todos" onPress={() => storeData(todos)} />
+      </View>
+      <AddTodoModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      >
+        <TextInput
+          style={styles.input}
+          onChangeText={setInputText}
+          value={inputText}
+        />
+        <Button
+          label="Add Todo"
+          onPress={() => {
+            addTodo({
+              id: uuidv4(),
+              label: inputText,
+              isComplete: false,
+              position: todos.length + 1,
+            });
+            setIsModalVisible(false);
+          }}
+        />
+      </AddTodoModal>
     </View>
   );
 }
@@ -80,10 +134,29 @@ export default function Todos() {
 const styles = StyleSheet.create({
   pageWrapper: {
     flex: 1,
+    justifyContent: "space-between",
+    backgroundColor: "#a3c4bc",
+    paddingVertical: 20,
   },
   itemWrapper: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     padding: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+    marginHorizontal: 20,
+  },
+  itemText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  input: {
+    color: "white",
+    padding: 20,
+    fontSize: 16,
+    backgroundColor: "#8993a0",
+    marginHorizontal: 20,
+    marginVertical: 20,
   },
 });
