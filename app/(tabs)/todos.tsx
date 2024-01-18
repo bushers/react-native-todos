@@ -7,14 +7,14 @@ import {
   TextInput,
 } from "react-native";
 import { v4 as uuidv4 } from "uuid";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import DraggableFlatList, {
   ScaleDecorator,
   RenderItemParams,
 } from "react-native-draggable-flatlist";
 import { getData, storeData } from "../../lib/getData";
 import Button from "../../components/Button";
-import AddTodoModal from "../../components/AddTodoModal";
+import BaseModal from "../../components/BaseModal";
 
 export interface TodoItem {
   id: string;
@@ -31,7 +31,10 @@ const dummyTodos: Array<TodoItem> = [
 
 export default function Todos() {
   const [todos, setTodos] = useState<Array<TodoItem>>([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<TodoItem>();
+  const [modalVisible, setModalVisible] = useState<"add" | "delete" | "none">(
+    "none"
+  );
   const [inputText, setInputText] = useState("");
 
   useEffect(() => {
@@ -52,6 +55,10 @@ export default function Todos() {
 
   const addTodo = (todo: TodoItem) => {
     setTodos((todos) => [...todos, todo]);
+  };
+
+  const deleteTodo = (id: string) => {
+    setTodos((todos) => todos.filter((item) => id !== item.id));
   };
 
   const toggleItemDone = (id: string) => {
@@ -85,6 +92,16 @@ export default function Todos() {
               color="white"
             />
           )}
+          <FontAwesome
+            name="trash-o"
+            size={24}
+            color="white"
+            style={{ marginLeft: 10 }}
+            onPress={() => {
+              setSelectedTodo(item);
+              setModalVisible("delete");
+            }}
+          />
         </TouchableOpacity>
       </ScaleDecorator>
     );
@@ -101,13 +118,14 @@ export default function Todos() {
 
       <View>
         <View style={{ marginBottom: 10 }}>
-          <Button label="Add Todo" onPress={() => setIsModalVisible(true)} />
+          <Button label="Add Todo" onPress={() => setModalVisible("add")} />
         </View>
         <Button label="Save Todos" onPress={() => storeData(todos)} />
       </View>
-      <AddTodoModal
-        isVisible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+      <BaseModal
+        isVisible={modalVisible === "add"}
+        onClose={() => setModalVisible("none")}
+        label="Add todo"
       >
         <TextInput
           style={styles.input}
@@ -123,10 +141,38 @@ export default function Todos() {
               isComplete: false,
               position: todos.length + 1,
             });
-            setIsModalVisible(false);
+            setModalVisible("none");
           }}
         />
-      </AddTodoModal>
+      </BaseModal>
+
+      <BaseModal
+        isVisible={modalVisible === "delete"}
+        onClose={() => setModalVisible("none")}
+        label="Delete todo"
+      >
+        <Text
+          style={{
+            paddingHorizontal: 30,
+            paddingVertical: 20,
+            color: "white",
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: 16,
+          }}
+        >
+          Are you sure you want to delete this item?
+        </Text>
+        <Button
+          label="Delete Todo"
+          onPress={() => {
+            if (selectedTodo) {
+              deleteTodo(selectedTodo?.id);
+            }
+            setModalVisible("none");
+          }}
+        />
+      </BaseModal>
     </View>
   );
 }
@@ -141,7 +187,6 @@ const styles = StyleSheet.create({
   itemWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: 20,
     borderRadius: 10,
     marginBottom: 10,
@@ -150,6 +195,7 @@ const styles = StyleSheet.create({
   itemText: {
     color: "white",
     fontWeight: "bold",
+    marginRight: "auto",
   },
   input: {
     color: "white",

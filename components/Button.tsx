@@ -7,23 +7,26 @@ interface ButtonProps {
 
 export default function Button({ label, onPress }: ButtonProps) {
   return (
-    <View style={styles.buttonContainer}>
-      <Pressable style={styles.button} onPress={onPress}>
+    <Pressable style={styles.button} onPress={onPress}>
+      <View style={styles.buttonContainer}>
         <Text style={styles.buttonLabel}>{label}</Text>
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    height: 60,
+    height: 50,
+    width: "90%",
     marginHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     padding: 3,
     backgroundColor: "#f3b391",
     borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#003459",
   },
   button: {
     borderRadius: 10,
